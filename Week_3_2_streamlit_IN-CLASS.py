@@ -1,7 +1,7 @@
 # Import the Streamlit library
 import streamlit as st
 # Display a simple text message
-st.title("Hi welcome to streamlit!")
+st.title("Hi welcome to streamlit")
 
 # Display a large title on the app
 
