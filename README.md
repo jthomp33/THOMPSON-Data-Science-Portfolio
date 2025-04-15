@@ -22,7 +22,7 @@ Here’s the layout for how my future projects will be organized:
 ## 🚜 **Work in Progress**  
 Stay tuned as I continue adding more projects and enhancing this repository. It’s all part of the plan to construct a top-tier portfolio!  
 One project that I am working on is my tine data project (found here: https://github.com/jthomp33/THOMPSON-Data-Science-Portfolio/blob/main/TinyDataProject.ipynb) This takes some data from my class and makes, cleans it up and makes it into some cool visualizations. This is just some proactice, but I hope to be bale to use it for larger and more comprehnesive data sets to produce some really compelling graphs. 
-
+I also am developing another new app making my intorduction into Machine Learning! This allows users to upload their own data or use a data set and see some cool visualizations and evaluate their accuracy - feel free to check it out here: 
 ---
 
 
