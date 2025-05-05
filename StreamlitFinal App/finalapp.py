@@ -64,16 +64,16 @@ def plot_dendrogram(data):
 def get_table_download_link(df):
     csv = df.to_csv(index=False)
     b64 = base64.b64encode(csv.encode()).decode()
-    href = f'<a href="data:file/csv;base64,{b64}" download="clustered_data.csv">\ud83d\udcc5 Download Clustered Data</a>'
+    href = f'<a href="data:file/csv;base64,{b64}" download="clustered_data.csv">📥 Download Clustered Data</a>'
     return href
 
 # -------------------
 # Streamlit App
 # -------------------
 st.set_page_config(page_title="ClusterPlay", layout="wide")
-st.title("\ud83d\udd0d ClusterPlay: Discover Patterns in Your Data")
+st.title("🔍 ClusterPlay: Discover Patterns in Your Data")
 
-st.sidebar.header("\ud83d\udcc1 Upload or Choose a Dataset")
+st.sidebar.header("📁 Upload or Choose a Dataset")
 sample_choice = st.sidebar.selectbox("Choose a sample dataset", ["None", "Iris", "Wine Quality"])
 uploaded_file = st.sidebar.file_uploader("Or upload a CSV file", type="csv")
 
@@ -90,18 +90,18 @@ if not numeric_cols:
     st.error("No numeric columns found for clustering.")
     st.stop()
 
-st.sidebar.header("\u2699\ufe0f Choose Algorithm")
+st.sidebar.header("⚙️ Choose Algorithm")
 model_type = st.sidebar.selectbox("Unsupervised Model", ["K-Means Clustering", "Hierarchical Clustering", "Principal Component Analysis (PCA)"])
 selected_cols = st.multiselect("Select features for analysis:", numeric_cols, default=numeric_cols, help="Choose which columns to use in clustering or PCA.")
 
 data = df[selected_cols].dropna()
 df = df.copy()
 
-st.header("\ud83d\udcca Data Preview")
+st.header("📊 Data Preview")
 st.write(df.head())
 
 st.markdown("""
-### \ud83e\udde0 Learn More
+### 🧠 Learn More
 **K-Means Clustering** partitions data into groups by minimizing intra-cluster variance. Useful in STEM for customer segmentation; in social science for grouping respondents.
 
 **Hierarchical Clustering** builds a tree of clusters bottom-up. Used in genetics and social stratification studies.
@@ -133,7 +133,7 @@ if model_type == "K-Means Clustering":
         pca_data, _ = run_pca(data, 3)
         pca_df = pd.DataFrame(pca_data, columns=['PC1', 'PC2', 'PC3'])
         pca_df['Cluster'] = labels
-        st.subheader("\ud83c\udf0d 3D PCA Cluster Visualization")
+        st.subheader("🌍 3D PCA Cluster Visualization")
         fig3d = px.scatter_3d(pca_df, x='PC1', y='PC2', z='PC3', color='Cluster')
         st.plotly_chart(fig3d, use_container_width=True)
 
@@ -178,12 +178,12 @@ elif model_type == "Principal Component Analysis (PCA)":
 # Download Clustered Dataset
 # -------------------
 st.markdown("""
-## \ud83d\udcc5 Download Results
+## 📥 Download Results
 Click below to export your clustered dataset:
 """)
 st.markdown(get_table_download_link(df), unsafe_allow_html=True)
 
-if st.button("\ud83c\udf88 Celebrate Successful Clustering!"):
+if st.button("🎈 Celebrate Successful Clustering!"):
     st.balloons()
 
-st.success("\u2705 Analysis complete. Adjust the model settings to explore different behaviors and visualize their effect!")
+st.success("✅ Analysis complete. Adjust the model settings to explore different behaviors and visualize their effect!")
