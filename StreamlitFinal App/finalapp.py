@@ -3,9 +3,10 @@ import pandas as pd     # Data manipulation
 import numpy as np      # Numerical operations
 from sklearn.cluster import KMeans, AgglomerativeClustering  # Clustering algorithms
 from sklearn.decomposition import PCA  # Dimensionality reduction
-from sklearn.metrics import silhouette_score  # Clustering evaluation
-from scipy.cluster.hierarchy import dendrogram, linkage  # Hierarchical clustering plots
+from sklearn.metrics import silhouette_score
+from scipy.cluster.hierarchy import dendrogram, linkage
 import matplotlib.pyplot as plt  # Static plotting
+import seaborn as sns  # For heatmaps
 import plotly.express as px  # Interactive plotting
 from io import StringIO
 import base64  # For downloading results
@@ -137,6 +138,13 @@ if model_type == "K-Means Clustering":
         fig3d = px.scatter_3d(pca_df, x='PC1', y='PC2', z='PC3', color='Cluster')
         st.plotly_chart(fig3d, use_container_width=True)
 
+    with st.expander("Cluster Correlation Heatmap"):
+        st.markdown("This shows how the average feature values compare across clusters.")
+        heat_df = clustered_df.groupby('Cluster')[selected_cols].mean()
+        fig, ax = plt.subplots()
+        sns.heatmap(heat_df, annot=True, cmap='coolwarm', ax=ax)
+        st.pyplot(fig)
+
     df = clustered_df.copy()
 
 # -------------------
@@ -156,6 +164,13 @@ elif model_type == "Hierarchical Clustering":
     with st.expander("See Dendrogram"):
         fig_dendro = plot_dendrogram(data)
         st.pyplot(fig_dendro)
+
+    with st.expander("Cluster Correlation Heatmap"):
+        st.markdown("This shows how the average feature values compare across clusters.")
+        heat_df = clustered_df.groupby('Cluster')[selected_cols].mean()
+        fig, ax = plt.subplots()
+        sns.heatmap(heat_df, annot=True, cmap='coolwarm', ax=ax)
+        st.pyplot(fig)
 
     df = clustered_df.copy()
 
