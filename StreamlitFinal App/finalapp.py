@@ -14,7 +14,6 @@ import base64  # For downloading results
 # Helper Functions
 # -------------------
 def load_sample_data(name):
-    # Load sample datasets from web or scikit-learn
     if name == "Iris":
         from sklearn.datasets import load_iris
         data = load_iris(as_frame=True)
@@ -25,7 +24,6 @@ def load_sample_data(name):
         return None
 
 def run_kmeans(data, n_clusters):
-    # K-means clustering: returns labels, inertia, silhouette score
     if n_clusters >= len(data):
         st.warning("Number of clusters must be less than number of data points.")
         return np.zeros(len(data)), 0, 0
@@ -34,19 +32,16 @@ def run_kmeans(data, n_clusters):
     return labels, kmeans.inertia_, silhouette_score(data, labels)
 
 def run_pca(data, n_components):
-    # PCA transformation: returns projected data and variance ratios
     pca = PCA(n_components=n_components)
     transformed = pca.fit_transform(data)
     return transformed, pca.explained_variance_ratio_
 
 def run_agglomerative(data, n_clusters, linkage_method):
-    # Agglomerative clustering with selectable linkage method
     model = AgglomerativeClustering(n_clusters=n_clusters, linkage=linkage_method)
     labels = model.fit_predict(data)
     return labels
 
 def plot_elbow(data):
-    # Elbow plot to visualize inertia for various k values in K-means
     inertias = []
     ks = range(2, min(11, len(data)))
     for k in ks:
@@ -60,7 +55,6 @@ def plot_elbow(data):
     return fig
 
 def plot_dendrogram(data):
-    # Visualize hierarchy using dendrogram
     linked = linkage(data, method='ward')
     fig, ax = plt.subplots(figsize=(10, 5))
     dendrogram(linked, ax=ax)
@@ -68,24 +62,21 @@ def plot_dendrogram(data):
     return fig
 
 def get_table_download_link(df):
-    # Create a download link for a CSV from a DataFrame
     csv = df.to_csv(index=False)
     b64 = base64.b64encode(csv.encode()).decode()
-    href = f'<a href="data:file/csv;base64,{b64}" download="clustered_data.csv">📥 Download Clustered Data</a>'
+    href = f'<a href="data:file/csv;base64,{b64}" download="clustered_data.csv">\ud83d\udcc5 Download Clustered Data</a>'
     return href
 
 # -------------------
 # Streamlit App
 # -------------------
 st.set_page_config(page_title="ClusterPlay", layout="wide")
-st.title("🔍 ClusterPlay: Discover Patterns in Your Data")
+st.title("\ud83d\udd0d ClusterPlay: Discover Patterns in Your Data")
 
-# Sidebar controls for dataset selection and upload
-st.sidebar.header("📁 Upload or Choose a Dataset")
+st.sidebar.header("\ud83d\udcc1 Upload or Choose a Dataset")
 sample_choice = st.sidebar.selectbox("Choose a sample dataset", ["None", "Iris", "Wine Quality"])
 uploaded_file = st.sidebar.file_uploader("Or upload a CSV file", type="csv")
 
-# Load data based on user selection
 if uploaded_file:
     df = pd.read_csv(uploaded_file)
 elif sample_choice != "None":
@@ -94,43 +85,35 @@ else:
     st.info("Please upload a dataset or select a sample to begin.")
     st.stop()
 
-# Filter numeric columns only
 numeric_cols = df.select_dtypes(include=np.number).columns.tolist()
 if not numeric_cols:
     st.error("No numeric columns found for clustering.")
     st.stop()
 
-# Sidebar controls for algorithm selection
-st.sidebar.header("⚙️ Choose Algorithm")
+st.sidebar.header("\u2699\ufe0f Choose Algorithm")
 model_type = st.sidebar.selectbox("Unsupervised Model", ["K-Means Clustering", "Hierarchical Clustering", "Principal Component Analysis (PCA)"])
-
-# Feature selection from numeric columns
-selected_cols = st.multiselect("Select features for analysis:", numeric_cols, default=numeric_cols)
-
+selected_cols = st.multiselect("Select features for analysis:", numeric_cols, default=numeric_cols, help="Choose which columns to use in clustering or PCA.")
 
 data = df[selected_cols].dropna()
-df = df.copy()  # avoid SettingWithCopyWarning
+df = df.copy()
 
-
-# Show preview of the uploaded/selected data
-st.header("📊 Data Preview")
+st.header("\ud83d\udcca Data Preview")
 st.write(df.head())
 
-# Educational section
 st.markdown("""
-### 🧠 Learn More
-**K-Means Clustering** partitions data into groups by minimizing intra-cluster variance. Look for tight, well-separated clusters. Useful in STEM for customer segmentation in marketing; in social science, for grouping survey respondents by behavior patterns.
+### \ud83e\udde0 Learn More
+**K-Means Clustering** partitions data into groups by minimizing intra-cluster variance. Useful in STEM for customer segmentation; in social science for grouping respondents.
 
-**Hierarchical Clustering** builds a tree of clusters using a bottom-up approach. Dendrograms help visualize nested groupings. In STEM, it's used for gene expression grouping; in social science, for analyzing cultural or social stratification.
+**Hierarchical Clustering** builds a tree of clusters bottom-up. Used in genetics and social stratification studies.
 
-**PCA** reduces dimensions by finding directions (components) that maximize variance. Helps reveal patterns by projecting complex data into 2D or 3D. Common in STEM for sensor data compression, or in social science for visualizing opinion survey trends.
+**PCA** reduces dimensionality while retaining variance. Helpful for visualizing complex relationships.
 """)
 
 # -------------------
 # K-Means Clustering Section
 # -------------------
 if model_type == "K-Means Clustering":
-    k = st.sidebar.slider("Number of clusters (k)", 2, min(10, len(data)-1), 3)
+    k = st.sidebar.slider("Number of clusters (k)", 2, min(10, len(data)-1), 3, help="Adjust how many clusters to form.")
     labels, inertia, silhouette = run_kmeans(data, k)
     clustered_df = data.copy()
     clustered_df['Cluster'] = labels
@@ -140,6 +123,7 @@ if model_type == "K-Means Clustering":
     st.plotly_chart(fig, use_container_width=True)
 
     st.markdown(f"**Silhouette Score:** {silhouette:.3f}")
+    st.markdown(f"**Inertia (within-cluster sum of squares):** {inertia:.2f}")
 
     with st.expander("See Elbow Plot"):
         fig_elbow = plot_elbow(data)
@@ -149,17 +133,18 @@ if model_type == "K-Means Clustering":
         pca_data, _ = run_pca(data, 3)
         pca_df = pd.DataFrame(pca_data, columns=['PC1', 'PC2', 'PC3'])
         pca_df['Cluster'] = labels
-        st.subheader("🌍 3D Cluster Globe")
-        fig3d = px.scatter_3d(pca_df, x='PC1', y='PC2', z='PC3', color='Cluster', title="3D PCA Cluster Visualization")
+        st.subheader("\ud83c\udf0d 3D PCA Cluster Visualization")
+        fig3d = px.scatter_3d(pca_df, x='PC1', y='PC2', z='PC3', color='Cluster')
         st.plotly_chart(fig3d, use_container_width=True)
 
-    df = clustered_df.copy()  # update df for download
+    df = clustered_df.copy()
+
 # -------------------
 # Hierarchical Clustering Section
 # -------------------
 elif model_type == "Hierarchical Clustering":
-    k = st.sidebar.slider("Number of clusters (k)", 2, min(10, len(data)-1), 3)
-    linkage_method = st.sidebar.selectbox("Linkage method", ["ward", "complete", "average"])
+    k = st.sidebar.slider("Number of clusters (k)", 2, min(10, len(data)-1), 3, help="Choose the number of groups to extract from the hierarchy.")
+    linkage_method = st.sidebar.selectbox("Linkage method", ["ward", "complete", "average"], help="Linkage strategy used to merge clusters.")
     labels = run_agglomerative(data, k, linkage_method)
     clustered_df = data.copy()
     clustered_df['Cluster'] = labels
@@ -172,12 +157,13 @@ elif model_type == "Hierarchical Clustering":
         fig_dendro = plot_dendrogram(data)
         st.pyplot(fig_dendro)
 
-    df = clustered_df.copy()  # update df for download
+    df = clustered_df.copy()
+
 # -------------------
 # Principal Component Analysis Section
 # -------------------
 elif model_type == "Principal Component Analysis (PCA)":
-    n = st.sidebar.slider("Number of components", 2, min(5, len(selected_cols)), 2)
+    n = st.sidebar.slider("Number of components", 2, min(5, len(selected_cols)), 2, help="Choose how many PCA dimensions to keep.")
     pca_data, variance = run_pca(data, n)
     pca_df = pd.DataFrame(pca_data, columns=[f"PC{i+1}" for i in range(n)])
 
@@ -192,12 +178,12 @@ elif model_type == "Principal Component Analysis (PCA)":
 # Download Clustered Dataset
 # -------------------
 st.markdown("""
-## 📥 Download Results
+## \ud83d\udcc5 Download Results
 Click below to export your clustered dataset:
 """)
 st.markdown(get_table_download_link(df), unsafe_allow_html=True)
 
-if st.button("🎈 Celebrate Successful Clustering!"):
+if st.button("\ud83c\udf88 Celebrate Successful Clustering!"):
     st.balloons()
 
-st.success("✅ Analysis complete. Try adjusting parameters to explore more!")
+st.success("\u2705 Analysis complete. Adjust the model settings to explore different behaviors and visualize their effect!")
